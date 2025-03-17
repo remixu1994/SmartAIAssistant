@@ -1,0 +1,83 @@
+﻿{
+  "AI": {
+    "DefaultProvider": "zhipu",
+    "Providers": [
+      {
+        "Name": "智谱",
+        "Code": "zhipu",
+        "AiType": "OpenAI_Compatible",
+        "ApiKey": "",
+        "ApiEndpoint": "https://open.bigmodel.cn/api/paas/v4",
+        "ApiServices": [
+          {
+            "Name": "chat-completions",
+            "ModelId": "glm-4"
+          },
+          {
+            "Name": "embeddings",
+            "ModelId": "embedding-3"
+          }
+        ]
+      },{
+        "Name": "月之暗面",
+        "Code": "moonshot",
+        "AiType": "OpenAI_Compatible",
+        "ApiKey": "sk-",
+        "ApiEndpoint":"https://api.moonshot.cn/v1",
+        "ApiServices": [
+          {
+            "Name": "chat-completions",
+            "ModelId": "moonshot-v1-8k"
+          }
+        ]
+      },
+      {
+        "Name": "Azure OpenAI",
+        "Code": "azure-openai",
+        "AiType": "AzureOpenAI",
+        "ApiKey": "",
+        "ApiEndpoint": "https://my-openapi.openai.azure.com",
+        "ApiServices": [
+          {
+            "Name": "chat-completions",
+            "ModelId": "gpt-4o"
+          },
+          {
+            "Name": "embeddings",
+            "ModelId": "text-embedding-ada-002"
+          }
+        ]
+      },{
+        "Name": "深度求索",
+        "Code": "deepseek",
+        "AiType": "OpenAI_Compatible",
+        "ApiKey": "",
+        "ApiEndpoint": " https://api.siliconflow.cn/v1",
+        "ApiServices": [
+          {
+            "Name": "chat-completions",
+            "ModelId": "deepseek-ai/DeepSeek-R1"
+          },
+          {
+            "Name": "embeddings",
+            "ModelId": "BAAI/bge-large-zh-v1.5"
+          }
+        ]
+      },
+      {
+        "Name": "One Api",
+        "Code": "oneapi",
+        "AiType": "OpenAI_Compatible",
+        "ApiKey": "sk-",
+        "ApiEndpoint": "http://localhost:3000/v1",
+        "ApiServices": [
+          {
+            "Name": "chat-completions",
+            "ModelId": "lite",
+            "ModelIds":["lite","glm-4-flash"]
+          }
+        ]
+      }
+    ]
+  }
+}
