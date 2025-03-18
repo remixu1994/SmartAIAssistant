@@ -1,6 +1,15 @@
+using MudBlazor.Services;
+using SemanticKernel;
 using SmartAIAssistant.Components;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSingleton<ChatService>();
+builder.Services.AddNLogging();
+builder.Services.RegisterKernels();
+
+builder.Services.AddHttpClient();
+builder.Services.AddMudServices();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()

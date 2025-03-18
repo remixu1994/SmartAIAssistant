@@ -1,10 +1,8 @@
-﻿using System.ClientModel;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.TextGeneration;
 using Microsoft.Extensions.DependencyInjection;
-using OpenAI;
 
 namespace SemanticKernel;
 
@@ -13,34 +11,37 @@ class Program
     [Experimental("SKEXP0010")]
     static async Task Main(string[] args)
     {
-        AiOptions aiOptions = AiSettings.LoadAiProvidersFromFile();
-        AiProvider openAiProvider = aiOptions.Providers.Find(x => x.Code == "azure-openai")!;
-        var builder = Kernel.CreateBuilder();
+        var request = "请快速发送今日简报给总经理";
+        var prompt = @$"<message role=""system"">Instructions: What is the intent of this request?
+ If you don't know the intent, don't guess; instead respond with ""Unknown"".
+ Choices: SendEmail, SendMessage, CompleteTask, CreateDocument, Unknown.
+ </message>
+ <message role=""user"">Can you send a very quick approval to the marketing team?</message>
+ <message role=""assistant"">SendMessage</message>
+ <message role=""user"">Can you send the full update to the marketing team? </message>
+ <message role=""assistant"">SendEmail</message>
+ <message role=""user"">{request}</message>
+ <message role=""assistant""></message>";
+        Kernel kernel = KernelService.GetKernel("azure-openai");
+        var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
+        await StreamOutput(chatCompletionService, "Help me study semantic kernel.", kernel);
+    }
 
-        Console.WriteLine("Hello, World!");
-
-        // Add OpenAI chat completion
-        builder.AddAzureOpenAIChatCompletion(
-            deploymentName: "gpt-4o",
-            endpoint: "https://my-openapi.openai.azure.com/",
-            apiKey: openAiProvider.ApiKey);
-
-        var zhipuEndpoint = new Uri("https://open.bigmodel.cn/api/paas/v4/");
-        AiProvider zhiPuAiProvider = aiOptions.Providers.Find(x => x.Code == "zhipu")!;
-        OpenAIClientOptions clientOptions = new OpenAIClientOptions();
-        clientOptions.Endpoint = zhipuEndpoint;
-        OpenAIClient client = new(new ApiKeyCredential(zhiPuAiProvider.ApiKey), clientOptions);
-        // Add OpenAI Chat completion
-        builder.AddOpenAIChatCompletion(
-            modelId: "glm-4-flash", // 可选模型编码：glm-4-plus、glm-4-0520、glm-4 、glm-4-air、glm-4-airx、glm-4-long、 glm-4-flash(免费)
-            openAIClient: client);
-
-        // Build kernel
-        var kernel = builder.Build();
-        // get text generation service
-        var textGenerationService = kernel.Services.GetRequiredService<ITextGenerationService>();
-
-        var text = await textGenerationService.GetTextContentAsync("Introduce yourself");
-        Console.WriteLine(text);
+    private static async Task StreamOutput(IChatCompletionService chatCompletionService, string prompt, Kernel kernel)
+    {
+        var chatHistory = new ChatHistory();
+        chatHistory.AddUserMessage(prompt);
+        var chatResult =  chatCompletionService.GetStreamingChatMessageContentsAsync(chatHistory, new PromptExecutionSettings(), kernel);
+        // Get response from chat completion service     
+        // var chatResult = chatCompletionService.GetStreamingChatMessageContentsAsync(message);
+        string response = "";
+        await foreach (var chunk in chatResult)
+        {
+            if (chunk.Role.HasValue) Console.Write(chunk.Role + ": ");
+            response += chunk;
+            await Task.Delay(100);
+            Console.Write(chunk);
+        }
+        chatHistory.AddAssistantMessage(response);
     }
 }

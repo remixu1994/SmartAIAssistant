@@ -1,0 +1,76 @@
+﻿@page "/chat"
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject ChatService chatService
+@rendermode InteractiveServer
+
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mx-auto mt-5">
+    <MudCard>
+        <MudCardContent>
+            <MudList T="Message" Dense="true" Style="height: 400px; overflow-y: auto;">
+                @foreach (var message in Messages)
+                {
+                    <MudListItem>
+                        <MudText>@message.Role: @message.Content</MudText>
+                    </MudListItem>
+                }
+            </MudList>
+        </MudCardContent>
+
+
+        <MudCardActions>
+            <MudTextField @bind-Value="UserInput" Label="输入消息..." FullWidth="true" />
+            <MudButton OnClick="SendMessage" Color="Color.Dark">发送</MudButton>
+            <MudButton OnClick="ProcessSomething" Variant="Variant.Filled" Color="Color.Primary" >Click Me</MudButton>
+        </MudCardActions>
+    </MudCard>
+</MudContainer>
+
+@code {
+    private string UserInput = "";
+    private List<Message> Messages = new();
+
+    private async Task SendMessage()
+    {
+        if (string.IsNullOrWhiteSpace(UserInput)) return;
+
+        Messages.Add(new Message { Role = "用户", Content = UserInput });
+
+        var reply = await chatService.InvokeAsync(UserInput);
+
+        if (reply != null)
+            Messages.Add(new Message()
+            {
+                Role = "AI",
+                Content = reply
+            });
+
+        UserInput = "";
+    }
+
+    public class Message
+    {
+        public string Role { get; set; } = "";
+        public string Content { get; set; } = "";
+    }
+
+    private async Task ProcessSomething(MouseEventArgs arg)
+    {
+        if (string.IsNullOrWhiteSpace(UserInput)) return;
+
+        Messages.Add(new Message { Role = "用户", Content = UserInput });
+
+        var reply = await chatService.InvokeAsync(UserInput);
+
+        if (reply != null)
+            Messages.Add(new Message()
+            {
+                Role = "AI",
+                Content = reply
+            });
+
+        UserInput = "";
+    }
+
+}
